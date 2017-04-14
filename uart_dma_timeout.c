@@ -110,6 +110,7 @@ void UART_DMA_Timeout_Init(void)
   USART_Cmd(UART4, ENABLE);
 	/* Enable UART4 DMA */
   USART_DMACmd(UART4, USART_DMAReq_Rx, ENABLE);
+  USART_DMACmd(UART4, USART_DMAReq_Tx, ENABLE);
 	
 	/* DMA1 Stream2 Channel4 for USART4 Rx configuration */			
   DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
@@ -129,6 +130,25 @@ void UART_DMA_Timeout_Init(void)
   DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
   DMA_Init(DMA1_Stream2, &DMA_InitStructure);
   DMA_Cmd(DMA1_Stream2, ENABLE);
+	
+	/* DMA1 Stream4 Channel4 for UART4 Tx configuration */			
+  DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&UART4->DR;
+  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)rxbuff; //Temporary
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+  DMA_InitStructure.DMA_BufferSize = BUFF_SIZE;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;         
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+  DMA_Cmd(DMA1_Stream4, ENABLE);
    
   /* GPIOC Configuration: TIM3 CH1 (PC6) */
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
@@ -180,6 +200,26 @@ void UART_DMA_Timeout_Init(void)
   TIM_SelectSlaveMode(TIM3, TIM_SlaveMode_Reset);
   TIM_SelectMasterSlaveMode(TIM3, TIM_MasterSlaveMode_Enable);
 	TIM_Cmd(TIM3, ENABLE);
+}
+
+/**
+  * @brief  Send Data to UART4 through DMA1 Stream4 Channel4
+  * @note   ...
+  * @param  pointer of array contains message
+  * @retval None
+  */
+void UART4_DMA_Send(char* p_message, uint16_t message_size)
+{
+	if(message_size > 64)
+	{
+	}
+	else
+	{
+		DMA_ClearFlag(DMA1_Stream4, DMA_FLAG_TCIF4);
+		DMA_MemoryTargetConfig(DMA1_Stream4, (uint32_t) p_message, DMA_Memory_0);
+		DMA_SetCurrDataCounter(DMA1_Stream4, message_size);//DMA1_Stream4->NDTR = BUFF_SIZE;
+		DMA_Cmd(DMA1_Stream4, ENABLE);
+	}
 }
 
 /**

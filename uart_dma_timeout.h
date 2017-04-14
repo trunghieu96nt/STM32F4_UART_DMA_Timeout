@@ -32,7 +32,7 @@
 void UART_DMA_Timeout_Init(void);
 
 /* Send function -------------------------------------------------------------*/
-
+void UART4_DMA_Send(char* p_message, uint16_t message_size);
 
 #ifdef __cplusplus
 }

@@ -32,14 +32,17 @@ int main(void)
 				if(!strcmp((char*) rcv_message, "[PD12_TOGGLE]"))
 				{
 					GPIO_ToggleBits(GPIOD, GPIO_Pin_12);
+					UART4_DMA_Send("[DONE]", strlen("[DONE]"));
 				}
 				else if(!strcmp((char*) rcv_message, "[PD12_ON]"))
 				{
 					GPIO_SetBits(GPIOD, GPIO_Pin_12);
+					UART4_DMA_Send("[DONE]", strlen("[DONE]"));
 				}
 				else if(!strcmp((char*) rcv_message, "[PD12_OFF]"))
 				{
 					GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+					UART4_DMA_Send("[DONE]", strlen("[DONE]"));
 				}
 			}
 		}
